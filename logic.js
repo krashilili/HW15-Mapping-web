@@ -39,7 +39,16 @@ function createFeatures(earthquakeData) {
       mags.push(d.properties.mag);
   });
 
-  var scale = chroma.scale(['#0f0','yellow','#f00']).domain([0,2,5]);
+  // var scale = chroma.scale(['#66ff99','#ffff66','#ffb366','#ff3300']).domain([0,2,5,10]);
+
+  function scale(d) {
+    return d < 1 ? '#99ff99' :
+          d < 2  ? '#ccff99' :
+          d < 3  ? '#ffff99' :
+          d < 4  ? '#ffcc66' :
+          d < 5  ? '#ff9933' :
+                    '#ff3300';
+  }
 
   // Define a function we want to run once for each feature in the features array
   // Give each feature a popup describing the place and time of the earthquake
@@ -60,7 +69,8 @@ function createFeatures(earthquakeData) {
               fillColor:scale(feature.properties.mag),
               color: "#000",
               weight: 1,
-              opacity: 1,
+              // stroke-opacity: .5,
+              opacity: .5,
               fillOpacity: 0.8
           });
     }
@@ -113,4 +123,33 @@ function createMap(earthquakes) {
   L.control.layers(baseMaps, overlayMaps, {
     collapsed: false
   }).addTo(myMap);
+
+  // Setting up the legend
+  var legend = L.control({ position: "bottomright" });
+  legend.onAdd = function() {
+      var div = L.DomUtil.create("div", "info legend");
+      var limits = ['0-1','1-2','2-3','3-4','4-5','5+'];
+      var colors = ['#99ff99','#ccff99','#ffff99','#ffcc66','#ff9933','#ff3300'];
+      var labels = [];
+
+      // Add min & max
+      var legendInfo = ["<table><tr><th></th><th></th></tr>"];
+          // "<div class=\"labels\">"];
+
+      limits.forEach(function (limit, index) {
+        legendInfo.push("<tr>");
+        legendInfo.push("<td class='colorLabel' style=\"background-color: " + colors[index] + "\"></td>");
+          legendInfo.push("<td>" + limit + "</td>");
+          legendInfo.push("</tr>");
+          // labels.push("<td style=\"background-color: " + colors[index] + "\"></td><em>"+limit+"</em>");
+      });
+      legendInfo.push("</table>");
+      // console.log(legendInfo);
+      div.innerHTML += legendInfo.join("");
+      // div.innerHTML += "<ul>" + labels.join("") + "</ul>";
+      return div;
+  };
+
+  // Adding legend to the map
+  legend.addTo(myMap);
 }
